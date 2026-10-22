@@ -27,3 +27,17 @@ Dark orange/black AMBAR Factory Management app with a protected server-side Admi
 3. For shared data, each staff member must sign in with an assigned account before editing. The existing UI is not a full public multi-user login system; unauthenticated use remains local to that browser.
 4. Signed-in administrator data is shared via the server's JSON store. A persistent Render disk is required. For heavy simultaneous use, migrate to a managed database such as PostgreSQL.
 5. Do not use this version for critical production until you test all workflows, reports, backups, and concurrent edits with a copy of your data.
+
+
+## UI/report updates in this build
+- Refined spacing and contrast with compact oval/pill buttons.
+- Workflow table displays WFN (the workflow product number) and removes the per-row Edit column; use the top Edit workflow record button.
+- Stock category buttons appear at the top (All products, Shoe Shelf, Others, Gadgets) and include Add category. Added categories are available in the current app session; use Admin Control configuration to save settings where supported.
+- Stock Changes edits update the linked workflow Changes field by source record or matching Product ID.
+- Ethiopian-calendar date equivalents are shown beside date-picker controls; dates remain stored internally in ISO/Gregorian form for correct filtering and data compatibility.
+- Reports include All reports, Workflow, Finished stock, Materials, Sales, Daily summary, and Product categories selectors.
+- Photo report downloads a single PNG summary of workflow, stock/sales, and materials.
+- The unified materials balance sheet remains visible in the Materials section.
+
+## Validation note
+The HTML JavaScript syntax and ZIP archive are checked. This build has not been fully tested in a live browser or with simultaneous users. Back up data and test on a staging Render service before replacing the live app.
