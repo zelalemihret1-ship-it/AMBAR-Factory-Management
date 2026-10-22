@@ -1,43 +1,31 @@
-# AMBAR Factory Management — Shared Admin Control Center
+# AMBAR Factory Management — Workbook-Organized Mini App
 
-Dark orange/black AMBAR Factory Management app with a protected server-side Admin Control Center and shared server-backed data synchronization for signed-in administrators.
+This version organizes the mini app around the workbook structure described by the user:
 
-## Render deployment
-- Runtime: Node
+1. **Dashboard** — overview cards for production, finished stock, material balance, and planned marketing posts.
+2. **Workflow** — WFN product tracking, product ID/model, ready-stock vs customer-order, priority, start/finish/delivery dates, sales name, and changes.
+3. **Finished stock** — products automatically added when workflow reaches IN STOCK; stock/sold reports and product categories.
+4. **Materials** — material receipts and daily cutting/usage share the unified materials balance sheet.
+5. **Reports** — date-range reports, summaries, charts, saved daily reports, CSV export, and photo report.
+6. **Marketing schedule** — TikTok and social posting calendar with platform, title, date/time, status, link, remarks, edit/delete, and CSV export.
+7. **Admin Control** — protected login, server record controls, system configuration, and assigned administrators.
+
+## Run locally
+- Node.js 18+
+- `npm install`
+- Set `ADMIN_USERNAME` and `ADMIN_PASSWORD` (use a unique password of at least 12 characters)
+- Set `NODE_ENV=production` when deployed with HTTPS
+- `npm start`
+
+## Render
 - Build command: `npm install`
 - Start command: `npm start`
-- Root directory: folder containing `server.js`, `package.json`, and `public/`.
-- Environment variables:
-  - `ADMIN_USERNAME`: main administrator username
-  - `ADMIN_PASSWORD`: unique password (at least 12 characters)
-  - `NODE_ENV`: `production`
-- Attach a Render persistent disk mounted at `/opt/render/project/src/data` (adjust for your Root Directory). JSON records, users, configuration, and backups are stored in `data/`.
+- Set environment variables `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `NODE_ENV=production`.
+- Configure a persistent disk mounted to the app's `data` directory, or use a persistent database before relying on this for production.
 
-## Admin features
-- Hashed passwords, HttpOnly/SameSite session cookie, main owner and assigned admin/viewer roles.
-- Owner can add/remove assigned accounts and change configuration.
-- Admin can edit server-side records through the advanced JSON editor; writes create a backup first.
-- Signed-in admin sessions load server records into the normal Workflow/Stock/Materials screens. Normal saves and saved daily reports sync to the server for signed-in admins.
-- “Copy this browser's data to server” migrates local records and saved daily reports without deleting the browser copy. Migration refuses to overwrite a non-empty server record store.
-- Exportable JSON backup and monthly browser reminder.
-
-## Important
-1. Back up your existing browser records and repository before deployment.
-2. Deploy, sign in through **Admin Control**, then use **Copy this browser's data to server** if the server is empty.
-3. For shared data, each staff member must sign in with an assigned account before editing. The existing UI is not a full public multi-user login system; unauthenticated use remains local to that browser.
-4. Signed-in administrator data is shared via the server's JSON store. A persistent Render disk is required. For heavy simultaneous use, migrate to a managed database such as PostgreSQL.
-5. Do not use this version for critical production until you test all workflows, reports, backups, and concurrent edits with a copy of your data.
-
-
-## UI/report updates in this build
-- Refined spacing and contrast with compact oval/pill buttons.
-- Workflow table displays WFN (the workflow product number) and removes the per-row Edit column; use the top Edit workflow record button.
-- Stock category buttons appear at the top (All products, Shoe Shelf, Others, Gadgets) and include Add category. Added categories are available in the current app session; use Admin Control configuration to save settings where supported.
-- Stock Changes edits update the linked workflow Changes field by source record or matching Product ID.
-- Ethiopian-calendar date equivalents are shown beside date-picker controls; dates remain stored internally in ISO/Gregorian form for correct filtering and data compatibility.
-- Reports include All reports, Workflow, Finished stock, Materials, Sales, Daily summary, and Product categories selectors.
-- Photo report downloads a single PNG summary of workflow, stock/sales, and materials.
-- The unified materials balance sheet remains visible in the Materials section.
-
-## Validation note
-The HTML JavaScript syntax and ZIP archive are checked. This build has not been fully tested in a live browser or with simultaneous users. Back up data and test on a staging Render service before replacing the live app.
+## Data and safety
+- Existing browser data remains in localStorage until migrated by an administrator.
+- The server data API stores workflow, stock, materials, cutting, marketing schedule, and saved reports together.
+- Back up the existing repository and production data before deploying.
+- The actual Excel workbook was not attached in the conversation; this build uses the workbook layout and module description provided in the message. It does not import spreadsheet rows automatically.
+- Verify the screens and multi-user behavior in a staging deployment before using it for daily operations.
