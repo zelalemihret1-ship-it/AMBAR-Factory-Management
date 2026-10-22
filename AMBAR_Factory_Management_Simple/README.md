@@ -1,31 +1,33 @@
-# AMBAR Factory Management — Workbook-Organized Mini App
+# AMBAR Furniture Workshop MES / ERP — Enterprise Starter Package
 
-This version organizes the mini app around the workbook structure described by the user:
+This package is based on the supplied Enterprise Architecture specification. It includes the existing AMBAR workshop web app, a normalized PostgreSQL schema for the next MES/ERP phase, and the full specification for implementation reference.
 
-1. **Dashboard** — overview cards for production, finished stock, material balance, and planned marketing posts.
-2. **Workflow** — WFN product tracking, product ID/model, ready-stock vs customer-order, priority, start/finish/delivery dates, sales name, and changes.
-3. **Finished stock** — products automatically added when workflow reaches IN STOCK; stock/sold reports and product categories.
-4. **Materials** — material receipts and daily cutting/usage share the unified materials balance sheet.
-5. **Reports** — date-range reports, summaries, charts, saved daily reports, CSV export, and photo report.
-6. **Marketing schedule** — TikTok and social posting calendar with platform, title, date/time, status, link, remarks, edit/delete, and CSV export.
-7. **Admin Control** — protected login, server record controls, system configuration, and assigned administrators.
+## Included
+- `public/index.html`: current AMBAR workshop mini-app UI (workflow, finished stock, materials, reports, marketing and admin control).
+- `server.js`: current Node.js JSON-file backend with protected admin endpoints.
+- `database/schema.sql`: normalized PostgreSQL schema covering products, BOM, raw materials, work orders, stage logs, material transactions, finished inventory, commissions, QC and audit log.
+- `docs/Enterprise_MES_Specification.md`: the specification supplied for this update.
 
-## Run locally
-- Node.js 18+
-- `npm install`
-- Set `ADMIN_USERNAME` and `ADMIN_PASSWORD` (use a unique password of at least 12 characters)
-- Set `NODE_ENV=production` when deployed with HTTPS
-- `npm start`
+## Run the current web app
+1. Install Node.js 18 or newer.
+2. Run `npm install` (no third-party packages are currently required).
+3. Set `ADMIN_USERNAME` and `ADMIN_PASSWORD` in the environment. Use a unique password of at least 12 characters.
+4. Run `npm start` and open `http://localhost:3000`.
 
-## Render
+## Deploy on Render
 - Build command: `npm install`
 - Start command: `npm start`
-- Set environment variables `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `NODE_ENV=production`.
-- Configure a persistent disk mounted to the app's `data` directory, or use a persistent database before relying on this for production.
+- Set `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `NODE_ENV=production`.
+- Mount persistent storage for the app's `data` directory, or migrate to PostgreSQL before relying on production records.
 
-## Data and safety
-- Existing browser data remains in localStorage until migrated by an administrator.
-- The server data API stores workflow, stock, materials, cutting, marketing schedule, and saved reports together.
-- Back up the existing repository and production data before deploying.
-- The actual Excel workbook was not attached in the conversation; this build uses the workbook layout and module description provided in the message. It does not import spreadsheet rows automatically.
-- Verify the screens and multi-user behavior in a staging deployment before using it for daily operations.
+## Important implementation status
+The current web app is the existing operational starter and does **not yet implement every advanced feature in the specification**. In particular, the PostgreSQL schema is provided as a migration foundation; the current server still stores app data in JSON files. BOM reservation/explosion, QR scanning and traveler labels, six-stage timing, enforced QC gate, atomic POS transactions, commission calculations, Telegram/WhatsApp/SMS dispatch, and full role-based screen restrictions still need backend and UI integration and live testing. Do not treat those items as active merely because their tables or specification are included.
+
+## Suggested implementation order
+1. Back up current data and deploy a staging copy.
+2. Migrate JSON records to PostgreSQL and add transactional APIs.
+3. Implement BOM allocation and insufficient-stock checks.
+4. Add six-stage routing, worker time logs, QR traveler page, and mandatory QC.
+5. Add sale checkout, receipts, commission ledger, and stock discharge transaction.
+6. Add low-stock/bottleneck notifications and role-based permissions.
+7. Test with sample records before switching the live workshop over.
