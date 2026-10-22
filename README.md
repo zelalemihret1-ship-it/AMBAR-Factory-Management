@@ -28,24 +28,33 @@ Requirements: Node.js 20+ and a PostgreSQL database.
 
 The app creates its database tables and initial admin on first start. If you change `ADMIN_PASSWORD` after the admin account already exists, this startup process does not overwrite that user's password hash. Use a password-management migration/process before real deployment.
 
-## Deploy on Render
-1. Push this folder's contents to a new GitHub repository.
-2. Create a **PostgreSQL database** with a provider you control. On Render, create a PostgreSQL database and copy its **Internal Database URL** for a web service in the same region, or use the External URL if required.
-3. Create a Render **Web Service** connected to the repository.
-   - Build command: `npm install`
-   - Start command: `npm start`
-4. Add environment variables in Render from `.env.example`:
-   - `DATABASE_URL` = your PostgreSQL connection URL
-   - `DATABASE_SSL` = `true` when required by your database provider (for Render internal database connections, check the provider's current instructions)
-   - `JWT_SECRET` = a long random secret
-   - `ADMIN_USERNAME` = your chosen username
-   - `ADMIN_PASSWORD` = a strong unique password (at least 12 characters recommended)
-   - `ADMIN_NAME` = your admin display name
-   - `TELEGRAM_BOT_TOKEN` = optional BotFather token
-   - `TELEGRAM_ADMIN_CHAT_ID` = optional Telegram chat ID for daily reports
-   - `DAILY_REPORT_CRON` = optional cron expression, default `0 18 * * *`
-5. Deploy and open the Render URL. Test sign-in and create a test product before importing real records.
-6. Keep `.env` out of GitHub. Never paste the bot token or passwords into public chats or source files.
+## Deploy on Render with Supabase (free-tier target)
+
+This app uses PostgreSQL (`pg`), so it can use a Supabase PostgreSQL database. The app will **not start successfully without a real `DATABASE_URL`, `JWT_SECRET`, and `ADMIN_PASSWORD`**. Do not enter placeholder text such as `value`.
+
+1. In Supabase, create a project and wait for the database to finish provisioning.
+2. In the Supabase dashboard, open the database connection settings and copy a PostgreSQL connection string that is reachable from Render. Use the provider's recommended connection method; if the direct connection does not work from the Render runtime, use Supabase's session pooler connection string.
+3. In Render, create a Web Service from this repository. Set:
+   - Build Command: `npm install`
+   - Start Command: `npm start`
+   - Instance Type: Free
+4. Add these environment variables in Render:
+   - `NODE_ENV` = `production`
+   - `DATABASE_URL` = the actual Supabase PostgreSQL connection string (never share it publicly)
+   - `DATABASE_SSL` = `true`
+   - `JWT_SECRET` = a long random secret (at least 32 random characters)
+   - `ADMIN_USERNAME` = `admin` (or your preferred username)
+   - `ADMIN_PASSWORD` = a strong unique password of at least 12 characters
+   - `ADMIN_NAME` = `Factory Admin` (or your preferred display name)
+   - `TELEGRAM_BOT_TOKEN` = optional; your BotFather token, kept secret
+   - `TELEGRAM_ADMIN_CHAT_ID` = optional numeric ID for the management chat/channel
+   - `DAILY_REPORT_CRON` = optional; defaults to `0 18 * * *` (18:00 Ethiopia time)
+5. Deploy and check the Render logs. Confirm the database tables and initial admin are created before entering real factory data.
+6. Keep `.env` out of GitHub. Never commit passwords, database URLs, JWT secrets, or bot tokens.
+
+**Do not use these older/incorrect variable names:** `TELEGRAM_GROUP_ID` or `TELEGRAM_CHANNEL_ID`. This version's scheduled-report code reads `TELEGRAM_ADMIN_CHAT_ID`. Telegram chat integration is optional during first deployment; you can add the bot variables later.
+
+Free-tier terms, quotas, pausing, and availability may change. A free plan is not a guarantee of lifetime service or uninterrupted uptime. Back up important data regularly.
 
 ## Telegram daily report setup
 1. Create a bot using Telegram's official `@BotFather` and store its token only in Render environment variables.
