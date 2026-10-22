@@ -1,11 +1,9 @@
 {
-  "name": "ambar-shared-workshop-app",
-  "version": "1.0.0",
+  "name": "ambar-furniture-workshop-erp",
+  "version": "2.0.0",
   "private": true,
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "express": "^4.21.2"
-  }
+  "description": "AMBAR Furniture Workshop Management System with PostgreSQL shared storage",
+  "scripts": {"start": "node server.js"},
+  "engines": {"node": ">=20"},
+  "dependencies": {"express": "^4.21.2", "pg": "^8.13.1"}
 }
