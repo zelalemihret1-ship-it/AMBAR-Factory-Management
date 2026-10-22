@@ -250,6 +250,13 @@ function resetDemo(){
   if(!confirm("Reset this browser's data to the original sample records? Download a backup first if you need to keep changes."))return;
   localStorage.removeItem(STORAGE_KEY); alert("Demo reset only clears this browser cache. To reset shared factory records, use a protected admin reset after authentication is configured."); location.reload();
 }
+function renderAll(){
+  renderDashboard();
+  renderWorkshop();
+  renderInventory();
+  renderMaterials();
+  renderSales();
+}
 function renderReports(){
   const revenue=sales.reduce((sum,s)=>sum+Number(s.price||0),0);
   const avg=sales.length?revenue/sales.length:0;
