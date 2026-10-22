@@ -1,33 +1,22 @@
-# AMBAR Furniture Workshop MES / ERP — Enterprise Starter Package
+# AMBAR Factory Management — Shared Users build
 
-This package is based on the supplied Enterprise Architecture specification. It includes the existing AMBAR workshop web app, a normalized PostgreSQL schema for the next MES/ERP phase, and the full specification for implementation reference.
-
-## Included
-- `public/index.html`: current AMBAR workshop mini-app UI (workflow, finished stock, materials, reports, marketing and admin control).
-- `server.js`: current Node.js JSON-file backend with protected admin endpoints.
-- `database/schema.sql`: normalized PostgreSQL schema covering products, BOM, raw materials, work orders, stage logs, material transactions, finished inventory, commissions, QC and audit log.
-- `docs/Enterprise_MES_Specification.md`: the specification supplied for this update.
-
-## Run the current web app
-1. Install Node.js 18 or newer.
-2. Run `npm install` (no third-party packages are currently required).
-3. Set `ADMIN_USERNAME` and `ADMIN_PASSWORD` in the environment. Use a unique password of at least 12 characters.
-4. Run `npm start` and open `http://localhost:3000`.
+## What this update does
+- Stores the factory's shared state on the server rather than relying only on each browser's local storage.
+- Loads the shared records when a user opens the app.
+- Checks for server updates every 5 seconds and refreshes another user's screen when it can do so safely.
+- Keeps the existing Export backup JSON feature.
 
 ## Deploy on Render
-- Build command: `npm install`
-- Start command: `npm start`
-- Set `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `NODE_ENV=production`.
-- Mount persistent storage for the app's `data` directory, or migrate to PostgreSQL before relying on production records.
+1. Upload/extract this project into a GitHub repository.
+2. In Render, create a **Web Service** connected to that repository.
+3. Build command: `npm install`
+4. Start command: `npm start`
+5. Add a **persistent disk** mounted at `/opt/render/project/src/data` and set environment variable `DATA_DIR=/opt/render/project/src/data`.
+6. Deploy, then open `https://YOUR-SERVICE.onrender.com/api/health`. It should return JSON with `ok: true`.
+7. Open the main app URL in two different browsers/devices, add a test record in one, and confirm it appears on the other.
 
-## Important implementation status
-The current web app is the existing operational starter and does **not yet implement every advanced feature in the specification**. In particular, the PostgreSQL schema is provided as a migration foundation; the current server still stores app data in JSON files. BOM reservation/explosion, QR scanning and traveler labels, six-stage timing, enforced QC gate, atomic POS transactions, commission calculations, Telegram/WhatsApp/SMS dispatch, and full role-based screen restrictions still need backend and UI integration and live testing. Do not treat those items as active merely because their tables or specification are included.
-
-## Suggested implementation order
-1. Back up current data and deploy a staging copy.
-2. Migrate JSON records to PostgreSQL and add transactional APIs.
-3. Implement BOM allocation and insufficient-stock checks.
-4. Add six-stage routing, worker time logs, QR traveler page, and mandatory QC.
-5. Add sale checkout, receipts, commission ledger, and stock discharge transaction.
-6. Add low-stock/bottleneck notifications and role-based permissions.
-7. Test with sample records before switching the live workshop over.
+## Important limitations / safety
+- This is a shared-data starter, not a full enterprise-grade multi-user database. The API currently has no login or role-based authorization; **do not expose it publicly for real sensitive factory data until authentication and permissions are added**.
+- Concurrent edits to the same record can overwrite each other. For reliable production use, migrate this state API to PostgreSQL/Supabase with authenticated user sessions, row-level permissions, audit history, and conflict-safe updates.
+- Persistent storage is required on Render; without it, data may be lost on redeploy/restart.
+- This app is not connected to your live deployment automatically. Deploy and test this package before replacing your current app.
