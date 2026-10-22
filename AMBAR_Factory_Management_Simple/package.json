@@ -1,22 +1,8 @@
 {
-  "name": "ambar-furniture-factory-management",
+  "name": "ambar-factory-management",
   "version": "1.0.0",
   "private": true,
-  "description": "AMBAR Furniture factory workflow, stock, material and daily reporting app with Telegram bot.",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
-  },
-  "engines": {
-    "node": ">=20"
-  },
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.2",
-    "node-cron": "^3.0.3",
-    "pg": "^8.13.1"
-  }
+  "description": "AMBAR Factory Management Mini App",
+  "scripts": {"start": "node server.js"},
+  "engines": {"node": ">=18"}
 }
