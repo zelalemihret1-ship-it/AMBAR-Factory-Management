@@ -1,38 +1,41 @@
-# AMBAR Furniture Workshop ERP — Main Administrator Sign-in Fix
+# AMBAR Furniture Workshop ERP — Complete Deployment Files
 
-This build fixes a common sign-in failure: previously, if the admin username already existed in PostgreSQL, changing `ADMIN_PASSWORD` in Render did not update that user's stored password. On each server start, this build now ensures the configured `ADMIN_USERNAME` exists, is active, has the `admin` role and `all` access, and has a password hash synchronized from `ADMIN_PASSWORD`. Existing sessions for that configured owner are revoked on restart.
+This folder contains the complete application package: frontend, Node/Express server, PostgreSQL persistence, sign-in, main-admin account synchronization, staff assignment endpoints, and Render Blueprint configuration.
 
-## Create / recover the main administrator
+## Important: first deployment on Render
 
-In **Render → your Web Service → Environment**, set these values:
+1. Upload these complete files to a GitHub repository. Keep `public/index.html` inside the `public` folder.
+2. In Render, choose **New → Blueprint** and select that repository. Render reads `render.yaml` and creates the web service and PostgreSQL database. The database plan may be paid; check Render's current pricing before confirming.
+3. During Blueprint setup, supply `ADMIN_USERNAME` and `ADMIN_PASSWORD`. Use a username of 3–40 characters (`a-z`, digits, `.`, `_`, `-`) and a password of at least 12 characters. Do not put secrets in GitHub.
+4. Wait for deployment to finish. In the web service's Environment page, verify `DATABASE_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_NAME`, and `NODE_ENV=production` exist. If you already have a PostgreSQL database, use its connection string instead of creating a second database.
+5. Open `https://YOUR-SERVICE.onrender.com/api/health`. A working deployment returns JSON containing `"ok":true`, `"database":"postgresql"`, and `"auth":"enabled"`.
+6. Open the service URL (not a local HTML file) and sign in with the exact `ADMIN_USERNAME` and `ADMIN_PASSWORD` saved in Render.
 
-- `DATABASE_URL`: your Render PostgreSQL internal connection string (or the database URL already attached to the service)
-- `ADMIN_USERNAME`: your chosen owner username, e.g. `ambar.owner`
-- `ADMIN_PASSWORD`: your own strong password, at least 12 characters; use a unique password
-- `ADMIN_NAME`: e.g. `AMBAR Main Administrator`
-- `NODE_ENV`: `production`
+## How main-admin recovery works
 
-Save changes and redeploy. Then open `/api/health` on the deployed site; it should return `ok: true`, `database: postgresql`, `auth: enabled`. Sign in with the exact `ADMIN_USERNAME` and `ADMIN_PASSWORD` set in Render. Username matching is case-insensitive and surrounding spaces are removed.
+On each server startup, the application ensures the username configured by `ADMIN_USERNAME` exists, updates that account's display name, synchronizes its password from `ADMIN_PASSWORD`, restores `role=admin`, `area=all`, and `active=true`, and revokes old sessions for that account. This is intentionally a startup operation: changing Render environment variables requires a restart/redeploy before the new password works.
 
-**Security:** Do not put the password in the source code, GitHub, README, or a message. Only enter it in Render's Environment settings. Every time this service starts, the configured environment password becomes the main admin password for that username. If you want to change it, change `ADMIN_PASSWORD` in Render and redeploy.
+Use the same username spelling as Render's environment variable. Usernames are normalized to lowercase. Do not delete the `ambar_users` table manually. The main-admin username is controlled by the environment variable, not by a form in the app.
 
-## Deploy
+## Troubleshooting sign-in
 
-1. Upload the contents of this folder to the root of your GitHub repository, keeping `public/index.html` at that exact path.
-2. On Render choose Node runtime, build command `npm install`, start command `npm start`.
-3. Attach your PostgreSQL database and configure the environment variables above.
-4. Deploy and verify `/api/health`.
-5. Sign in with the configured owner credentials and open **Admin & Staff** to add employees.
+- **`/api/health` does not show `ok:true`:** the server or database is not healthy. Open Render → service → Logs and look for `DB initialization failed`, missing `DATABASE_URL`, or a database connection error.
+- **`/api/health` works but login says incorrect username/password:** check the current `ADMIN_USERNAME` and `ADMIN_PASSWORD` in Render, save them, then manually trigger **Deploy latest commit** or restart the service. Type the same values into the login page; username is lowercase-normalized. Passwords are case-sensitive.
+- **Login page never completes:** make sure you opened the Render HTTPS URL and not `public/index.html` directly from your computer. Static-file opening does not run the server/API.
+- **After changing the admin password:** redeploy/restart, wait for logs to show `Main administrator account ensured...`, then reload the page and sign in again.
+- **A staff user cannot open an area:** sign in as main admin and assign that account to the matching area. Admin accounts have full area access.
 
-## Admin behavior
+## Local development
 
-The configured owner account is ensured as an active `admin` with `all` access. Admin-only staff account APIs require a valid server session. Staff passwords are hashed using Node `scrypt`; sessions use HttpOnly cookies. Staff account creation requires passwords of at least 10 characters.
+Requires Node.js 20+ and a reachable PostgreSQL database. Copy `.env.example` to `.env`, set real values, then run:
 
-## Troubleshooting
+```bash
+npm install
+npm start
+```
 
-- If `/api/health` fails, check Render logs and `DATABASE_URL` first.
-- If login says incorrect username/password, verify the exact values in Render Environment, redeploy, and then sign in again. This build resets the configured owner's password hash on startup from the environment variable.
-- If Render shows an old build, confirm the correct GitHub branch and latest deploy succeeded.
-- Ensure you open the HTTPS Render URL, not an old local preview.
+The app listens on `http://localhost:3000` by default. The included `.env` example is not a real credential file. The application currently reads environment variables directly; if running locally, export them in your shell or use your platform's environment-variable configuration.
 
-This package improves account bootstrap and recovery but is not a substitute for a security audit, read isolation by department, rate limiting, CSRF defenses, and tested backups.
+## Current limitations
+
+This is a working foundation, not a completed audited enterprise ERP. It uses shared JSONB state in PostgreSQL and shared authenticated reads. Server-side write restrictions exist for staff areas, but row-level data isolation, CSRF protection, rate limiting, password reset/change UI, comprehensive immutable audit trails, automated backup/restore drills, and a formal security review are still needed before sensitive production use. Back up PostgreSQL regularly.
