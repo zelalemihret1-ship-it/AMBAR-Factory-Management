@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#123d3a"><title>AMBAR Factory</title>
+<style>
+:root{--teal:#14534d;--orange:#ed8b35;--ink:#172321;--muted:#6d7976;--line:#e2e9e6;--paper:#f5f7f5}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+header{background:var(--teal);color:white;padding:22px 18px 26px;border-radius:0 0 24px 24px}
+.wrap{max-width:900px;margin:auto} .brand{font-size:12px;letter-spacing:.16em;font-weight:800;color:#f6c18d}.title{font-size:27px;font-weight:800;margin:6px 0}.sub{color:#d9e8e4}
+main{padding:18px;max-width:900px;margin:auto}.panel{background:white;border:1px solid var(--line);border-radius:17px;padding:16px;margin-bottom:14px;box-shadow:0 4px 18px #193b3510}
+h2{font-size:17px;margin:0 0 12px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.stat{padding:14px;border-radius:13px;background:#f1f6f3}.stat strong{font-size:25px;display:block;color:var(--teal)}.stat span{font-size:12px;color:var(--muted)}
+label{display:block;font-size:13px;font-weight:700;margin:10px 0 5px}input,select,textarea{width:100%;border:1px solid #d7e1dd;border-radius:10px;padding:12px;font:inherit;background:#fff}button{border:0;border-radius:11px;padding:12px 15px;background:var(--teal);color:white;font:inherit;font-weight:750;cursor:pointer}button.alt{background:#edf4f1;color:var(--teal)}button.warn{background:#fff0e4;color:#8d4313}.row{display:flex;gap:9px;align-items:center}.row>*{flex:1;min-width:0}.job{border-top:1px solid var(--line);padding:13px 0}.job:first-child{border-top:0}.jobtop{display:flex;gap:10px;justify-content:space-between;align-items:start}.jobname{font-weight:800;overflow-wrap:anywhere}.badge{display:inline-block;border-radius:99px;background:#edf4f1;color:var(--teal);padding:5px 9px;font-size:11px;font-weight:800}.muted{color:var(--muted);font-size:13px}.hidden{display:none!important}.error{color:#a13030;margin-top:10px}.empty{padding:20px;text-align:center;color:var(--muted)}footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 0 24px}
+@media(max-width:560px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.title{font-size:24px}.row.mobile-stack{flex-direction:column;align-items:stretch}.row.mobile-stack>*{width:100%}}
+</style></head>
+<body>
+<header><div class="wrap"><div class="brand">AMBAR • FACTORY</div><div class="title">Factory Management</div><div class="sub">Simple production and inventory tracking</div></div></header>
+<main>
+<section class="panel" id="loginPanel"><h2>Owner / Admin sign in</h2><label for="password">Admin password</label><input id="password" type="password" autocomplete="current-password" placeholder="Enter your admin password"><div style="margin-top:12px"><button id="loginBtn">Sign in</button></div><div id="loginError" class="error"></div><p class="muted">Set the ADMIN_PASSWORD environment variable in Render before signing in.</p></section>
+<div id="app" class="hidden">
+<section class="grid" aria-label="Production summary">
+<div class="stat"><strong id="totalCount">0</strong><span>All jobs</span></div><div class="stat"><strong id="activeCount">0</strong><span>In production</span></div><div class="stat"><strong id="doneCount">0</strong><span>Completed / sold</span></div>
+</section>
+<section class="panel" style="margin-top:14px"><h2>Add production job</h2>
+<form id="addForm"><label for="name">Product / job name</label><input id="name" required maxlength="120" placeholder="e.g. Wooden shoe shelf">
+<div class="row mobile-stack"><div><label for="stage">Production stage</label><select id="stage"><option>Material preparation</option><option>Cutting</option><option>Assembly</option><option>Finishing</option><option>Completed</option><option>Sold</option></select></div><div><label for="quantity">Quantity</label><input id="quantity" type="number" min="0" step="1" value="1" required></div></div>
+<label for="notes">Notes (optional)</label><input id="notes" maxlength="500" placeholder="Material, size, customer, etc."><div style="margin-top:12px"><button type="submit">＋ Add job</button></div><div id="formError" class="error"></div></form></section>
+<section class="panel"><div class="row"><h2 style="flex:1">Production list</h2><button class="alt" id="refreshBtn" type="button">Refresh</button></div><div id="list"><div class="empty">Loading jobs…</div></div><div id="listError" class="error"></div></section>
+<button class="alt" id="logoutBtn" type="button">Sign out</button>
+</div>
+<footer>AMBAR Factory Management • Simple starter app</footer>
+</main>
+<script>
+const stages=["Material preparation","Cutting","Assembly","Finishing","Completed","Sold"];
+let token="";
+const $=id=>document.getElementById(id);
+async function request(path,opts={}){const r=await fetch(path,{...opts,headers:{"Content-Type":"application/json",...(token?{Authorization:"Bearer "+token}:{}),...(opts.headers||{})}});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.error||"Request failed");return d}
+function showApp(){ $("loginPanel").classList.add("hidden");$("app").classList.remove("hidden");loadItems()}
+function signOut(){token="";$("app").classList.add("hidden");$("loginPanel").classList.remove("hidden");$("password").value=""}
+$("loginBtn").addEventListener("click",async()=>{ $("loginError").textContent="";try{const d=await request("/api/login",{method:"POST",body:JSON.stringify({password:$("password").value})});token=d.token;showApp()}catch(e){$("loginError").textContent=e.message}});
+$("password").addEventListener("keydown",e=>{if(e.key==="Enter")$("loginBtn").click()});
+$("logoutBtn").addEventListener("click",signOut);$("refreshBtn").addEventListener("click",loadItems);
+$("addForm").addEventListener("submit",async e=>{e.preventDefault();$("formError").textContent="";try{await request("/api/items",{method:"POST",body:JSON.stringify({name:$("name").value,stage:$("stage").value,quantity:$("quantity").value,notes:$("notes").value})});$("addForm").reset();$("quantity").value="1";await loadItems()}catch(err){$("formError").textContent=err.message}});
+async function changeItem(id,field,value){try{await request("/api/items/"+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify({[field]:value})});await loadItems()}catch(e){$("listError").textContent=e.message}}
+async function deleteItem(id){if(!confirm("Delete this job?"))return;try{await request("/api/items/"+encodeURIComponent(id),{method:"DELETE"});await loadItems()}catch(e){$("listError").textContent=e.message}}
+async function loadItems(){ $("listError").textContent="";try{const d=await request("/api/items");const items=d.items||[];$("totalCount").textContent=items.length;$("activeCount").textContent=items.filter(x=>!["Completed","Sold"].includes(x.stage)).length;$("doneCount").textContent=items.filter(x=>["Completed","Sold"].includes(x.stage)).length;if(!items.length){$("list").innerHTML='<div class="empty">No jobs yet. Add your first production job above.</div>';return}
+$("list").innerHTML=items.map(x=>`<article class="job"><div class="jobtop"><div style="min-width:0"><div class="jobname">${esc(x.name)}</div><div class="muted">Quantity: ${Number(x.quantity)||0}${x.notes?" · "+esc(x.notes):""}</div></div><button class="warn" type="button" data-delete="${esc(x.id)}">Delete</button></div><div class="row mobile-stack" style="margin-top:10px"><div><label>Stage</label><select data-stage="${esc(x.id)}">${stages.map(s=>`<option ${x.stage===s?"selected":""}>${s}</option>`).join("")}</select></div><div><label>Quantity</label><input data-qty="${esc(x.id)}" type="number" min="0" step="1" value="${Number(x.quantity)||0}"></div><div style="align-self:end"><button class="alt" type="button" data-save="${esc(x.id)}">Save</button></div></div></article>`).join("");
+$("list").querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",()=>deleteItem(b.dataset.delete)));
+$("list").querySelectorAll("[data-save]").forEach(b=>b.addEventListener("click",()=>{const id=b.dataset.save;const stage=$("list").querySelector(`[data-stage="${CSS.escape(id)}"]`).value;const quantity=$("list").querySelector(`[data-qty="${CSS.escape(id)}"]`).value;changeItem(id,"stage",stage).then(()=>changeItem(id,"quantity",quantity))}));
+}catch(e){$("list").innerHTML='<div class="empty">Could not load production list.</div>';$("listError").textContent=e.message}}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+</script></body></html>

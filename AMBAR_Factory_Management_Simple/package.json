@@ -1,0 +1,11 @@
+{
+  "name": "ambar-factory-management",
+  "version": "1.0.0",
+  "description": "Simple AMBAR Factory Management Telegram Mini App",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.0"
+  }
+}
