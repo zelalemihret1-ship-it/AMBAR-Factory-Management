@@ -2,51 +2,151 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#123d3a"><title>AMBAR Factory</title>
+<title>AMBAR Furniture · Factory Management</title>
 <style>
-:root{--teal:#14534d;--orange:#ed8b35;--ink:#172321;--muted:#6d7976;--line:#e2e9e6;--paper:#f5f7f5}
-*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
-header{background:var(--teal);color:white;padding:22px 18px 26px;border-radius:0 0 24px 24px}
-.wrap{max-width:900px;margin:auto} .brand{font-size:12px;letter-spacing:.16em;font-weight:800;color:#f6c18d}.title{font-size:27px;font-weight:800;margin:6px 0}.sub{color:#d9e8e4}
-main{padding:18px;max-width:900px;margin:auto}.panel{background:white;border:1px solid var(--line);border-radius:17px;padding:16px;margin-bottom:14px;box-shadow:0 4px 18px #193b3510}
-h2{font-size:17px;margin:0 0 12px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.stat{padding:14px;border-radius:13px;background:#f1f6f3}.stat strong{font-size:25px;display:block;color:var(--teal)}.stat span{font-size:12px;color:var(--muted)}
-label{display:block;font-size:13px;font-weight:700;margin:10px 0 5px}input,select,textarea{width:100%;border:1px solid #d7e1dd;border-radius:10px;padding:12px;font:inherit;background:#fff}button{border:0;border-radius:11px;padding:12px 15px;background:var(--teal);color:white;font:inherit;font-weight:750;cursor:pointer}button.alt{background:#edf4f1;color:var(--teal)}button.warn{background:#fff0e4;color:#8d4313}.row{display:flex;gap:9px;align-items:center}.row>*{flex:1;min-width:0}.job{border-top:1px solid var(--line);padding:13px 0}.job:first-child{border-top:0}.jobtop{display:flex;gap:10px;justify-content:space-between;align-items:start}.jobname{font-weight:800;overflow-wrap:anywhere}.badge{display:inline-block;border-radius:99px;background:#edf4f1;color:var(--teal);padding:5px 9px;font-size:11px;font-weight:800}.muted{color:var(--muted);font-size:13px}.hidden{display:none!important}.error{color:#a13030;margin-top:10px}.empty{padding:20px;text-align:center;color:var(--muted)}footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 0 24px}
-@media(max-width:560px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.title{font-size:24px}.row.mobile-stack{flex-direction:column;align-items:stretch}.row.mobile-stack>*{width:100%}}
-</style></head>
+:root{--teal:#0d7774;--deep:#103d3d;--orange:#f08a32;--bg:#f3f6f5;--card:#fff;--ink:#192d2c;--muted:#71817f;--line:#e2eae7;--red:#b83232;--green:#16784e;--shadow:0 10px 30px #163d3b0c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink)}button,input,select,textarea{font:inherit}button{cursor:pointer}
+.hidden{display:none!important}.login-wrap{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(145deg,#103d3d,#0a5552)}.login-card{width:min(100%,420px);background:#fff;padding:30px;border-radius:22px;box-shadow:0 25px 80px #0003}.brand{display:flex;align-items:center;gap:12px;margin-bottom:26px}.logo{width:48px;height:48px;border-radius:15px;background:var(--orange);display:grid;place-items:center;font-weight:900;font-size:22px;color:#143c3b}.brand b{letter-spacing:.13em;font-size:13px}.brand small{display:block;color:var(--muted);margin-top:4px}.login-card h1{font-size:25px;margin:0 0 8px}.muted{color:var(--muted);font-size:13px;line-height:1.5}
+label{display:block;font-size:12px;font-weight:700;color:#526462;margin:13px 0 6px}input,select,textarea{width:100%;border:1px solid #dce6e3;border-radius:10px;padding:11px 12px;background:white;color:var(--ink);outline:none}input:focus,select:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px #0d777414}textarea{min-height:70px;resize:vertical}.btn{border:0;border-radius:10px;padding:11px 14px;font-size:12px;font-weight:800;background:var(--teal);color:#fff}.btn:hover{background:#075653}.btn.secondary{background:#edf5f3;color:var(--teal)}.btn.danger{background:#ffeded;color:var(--red)}.full{width:100%;margin-top:17px}.error{color:var(--red);font-size:12px;margin-top:12px}
+.layout{min-height:100vh;display:grid;grid-template-columns:235px 1fr}.sidebar{background:linear-gradient(165deg,#103d3d,#082c2d);padding:23px 14px;color:white}.sidebar .brand{padding:0 8px 22px}.sidebar .brand small{color:#b9d0cd}.nav-label{font-size:10px;letter-spacing:.14em;color:#8db2ae;padding:10px}.nav{display:grid;gap:6px}.nav button{border:0;background:transparent;color:#d8e7e5;text-align:left;border-radius:10px;padding:12px;font-size:12px}.nav button span{display:inline-block;width:28px}.nav button.active,.nav button:hover{background:#ffffff1c;color:white}.side-foot{font-size:10px;line-height:1.7;color:#9ebdb9;margin:25px 10px}
+main{padding:27px clamp(15px,3vw,36px);min-width:0}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin-bottom:23px}.eyebrow{color:var(--teal);font-size:10px;letter-spacing:.14em;font-weight:900;text-transform:uppercase}h1{font-size:clamp(24px,3vw,32px);letter-spacing:-.04em;margin:6px 0}.sub{color:var(--muted);font-size:12px}.actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.pill{border:1px solid var(--line);border-radius:10px;background:white;padding:10px 12px;font-size:11px;color:#5e706d}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}.metric,.panel{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:17px;box-shadow:var(--shadow);min-width:0}.metric .cap{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}.metric strong{display:block;font-size:27px;margin:10px 0 3px;letter-spacing:-.04em}.metric small{font-size:10px;color:var(--muted)}.panels{display:grid;grid-template-columns:1.2fr 1fr;gap:14px}.panel{margin-bottom:14px}.panel-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}.panel h2{font-size:15px;margin:0}.panel p{font-size:11px;color:var(--muted);margin:5px 0 0}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:11px}th{text-align:left;padding:10px 8px;color:var(--muted);font-size:9px;text-transform:uppercase;background:#f7faf9;letter-spacing:.05em}td{padding:12px 8px;border-bottom:1px solid #edf1f0}tr:last-child td{border-bottom:0}.badge{display:inline-block;border-radius:99px;padding:5px 8px;font-size:9px;font-weight:800;background:#e5f5ec;color:var(--green)}.badge.low{background:#ffebeb;color:var(--red)}.badge.progress{background:#fff1dc;color:#a85b0b}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 13px}.form-grid .wide{grid-column:1/-1}.form-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.msg{font-size:12px;margin-top:10px}.msg.ok{color:var(--green)}.msg.err{color:var(--red)}.notice{background:#f7faf9;border:1px dashed #d0ded9;padding:12px;border-radius:10px;font-size:11px;color:var(--muted);line-height:1.6}.section{display:none}.section.active{display:block}.footer{text-align:center;color:#8c9a98;font-size:10px;padding:8px 0 20px}
+@media(max-width:1000px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.panels{grid-template-columns:1fr}}
+@media(max-width:650px){.layout{grid-template-columns:1fr}.sidebar{padding:12px}.sidebar .brand{padding:0 5px 12px;margin-bottom:0}.nav-label,.side-foot{display:none}.nav{grid-template-columns:repeat(3,minmax(0,1fr))}.nav button{text-align:center;padding:9px 3px;font-size:9px}.nav button span{display:block;width:auto;margin-bottom:4px;font-size:15px}main{padding:19px 12px}.metric{padding:12px}.metric strong{font-size:22px}.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}.panel{padding:14px}}
+</style>
+</head>
 <body>
-<header><div class="wrap"><div class="brand">AMBAR • FACTORY</div><div class="title">Factory Management</div><div class="sub">Simple production and inventory tracking</div></div></header>
-<main>
-<section class="panel" id="loginPanel"><h2>Owner / Admin sign in</h2><label for="password">Admin password</label><input id="password" type="password" autocomplete="current-password" placeholder="Enter your admin password"><div style="margin-top:12px"><button id="loginBtn">Sign in</button></div><div id="loginError" class="error"></div><p class="muted">Set the ADMIN_PASSWORD environment variable in Render before signing in.</p></section>
-<div id="app" class="hidden">
-<section class="grid" aria-label="Production summary">
-<div class="stat"><strong id="totalCount">0</strong><span>All jobs</span></div><div class="stat"><strong id="activeCount">0</strong><span>In production</span></div><div class="stat"><strong id="doneCount">0</strong><span>Completed / sold</span></div>
+<section id="login" class="login-wrap">
+  <div class="login-card">
+    <div class="brand"><div class="logo">A</div><div><b>AMBAR FURNITURE</b><small>Factory management system</small></div></div>
+    <h1>Welcome back</h1><p class="muted">Sign in to manage workflow, finished stock, materials, and daily reports.</p>
+    <form id="loginForm"><label>Username</label><input name="username" autocomplete="username" required placeholder="admin"><label>Password</label><input name="password" type="password" autocomplete="current-password" required placeholder="Your password"><button class="btn full">Sign in securely</button><div id="loginError" class="error"></div></form>
+    <p class="muted" style="font-size:10px;margin-top:18px">Access is controlled by the factory administrator. Do not share passwords.</p>
+  </div>
 </section>
-<section class="panel" style="margin-top:14px"><h2>Add production job</h2>
-<form id="addForm"><label for="name">Product / job name</label><input id="name" required maxlength="120" placeholder="e.g. Wooden shoe shelf">
-<div class="row mobile-stack"><div><label for="stage">Production stage</label><select id="stage"><option>Material preparation</option><option>Cutting</option><option>Assembly</option><option>Finishing</option><option>Completed</option><option>Sold</option></select></div><div><label for="quantity">Quantity</label><input id="quantity" type="number" min="0" step="1" value="1" required></div></div>
-<label for="notes">Notes (optional)</label><input id="notes" maxlength="500" placeholder="Material, size, customer, etc."><div style="margin-top:12px"><button type="submit">＋ Add job</button></div><div id="formError" class="error"></div></form></section>
-<section class="panel"><div class="row"><h2 style="flex:1">Production list</h2><button class="alt" id="refreshBtn" type="button">Refresh</button></div><div id="list"><div class="empty">Loading jobs…</div></div><div id="listError" class="error"></div></section>
-<button class="alt" id="logoutBtn" type="button">Sign out</button>
-</div>
-<footer>AMBAR Factory Management • Simple starter app</footer>
-</main>
+<div id="app" class="layout hidden">
+<aside class="sidebar">
+  <div class="brand"><div class="logo">A</div><div><b>AMBAR FURNITURE</b><small>Factory management</small></div></div>
+  <div class="nav-label">WORKSPACE</div>
+  <nav class="nav">
+    <button class="active" data-section="dashboard"><span>▦</span>Dashboard</button>
+    <button data-section="products"><span>▣</span>Products</button>
+    <button data-section="workflow"><span>⚒</span>Workflow</button>
+    <button data-section="stock"><span>▤</span>Stock & sales</button>
+    <button data-section="materials"><span>▧</span>Materials</button>
+    <button data-section="reports"><span>◷</span>Daily reports</button>
+    <button data-section="employees" id="employeesNav"><span>♙</span>Employees</button>
+  </nav>
+  <div class="side-foot">Role-based access<br>Automatic product IDs<br><b>Connected records</b></div>
+</aside>
+<main>
+<header class="top"><div><div class="eyebrow">Factory overview</div><h1 id="pageTitle">Daily Report Dashboard</h1><div class="sub" id="welcome">Track production, stock and raw materials.</div></div><div class="actions"><div class="pill" id="today"></div><button class="btn secondary" id="exportBtn">Export CSV ↓</button><button class="btn" id="logout">Sign out</button></div></header>
+<section id="dashboard" class="section active">
+  <div class="metrics">
+    <div class="metric"><div class="cap">In production <span>⚒</span></div><strong id="mWorkflow">—</strong><small>Units in unfinished workflow entries</small></div>
+    <div class="metric"><div class="cap">Finished today <span>✓</span></div><strong id="mFinished">—</strong><small>New units added from completion entries</small></div>
+    <div class="metric"><div class="cap">Sold today <span>↗</span></div><strong id="mSold">—</strong><small>Units recorded as sold today</small></div>
+    <div class="metric"><div class="cap">Low materials <span>!</span></div><strong id="mLow">—</strong><small>Material balances at or below 5 units</small></div>
+  </div>
+  <div class="panels">
+    <section class="panel"><div class="panel-head"><div><h2>Recent activity</h2><p>Updates recorded by factory users</p></div><button class="btn secondary" onclick="loadDashboard()">Refresh</button></div><div id="recent" class="muted">Loading…</div></section>
+    <section class="panel"><div class="panel-head"><div><h2>Quick guide</h2><p>Recommended daily workflow</p></div></div><div class="notice">1. Register each product once. The system assigns its AMB product ID.<br><br>2. Record workflow stages as work progresses.<br><br>3. When a product is completed, the completion entry also adds finished stock.<br><br>4. Record each sale to reduce stock. Record materials received and used/cut to maintain material balances.<br><br>5. Open Daily Reports for a date-specific summary.</div></section>
+  </div>
+</section>
+<section id="products" class="section">
+  <div class="panels">
+    <section class="panel"><div class="panel-head"><div><h2>Register a product</h2><p>Product ID is generated automatically.</p></div></div>
+      <form id="productForm"><div class="form-grid">
+        <div><label>Product name *</label><input name="name" required placeholder="e.g. Wardrobe"></div>
+        <div><label>Category</label><input name="category" placeholder="e.g. Bedroom"></div>
+        <div><label>Unit</label><select name="unit"><option>piece</option><option>set</option><option>pair</option></select></div>
+        <div><label>Notes</label><input name="notes" placeholder="Optional details"></div>
+      </div><div class="form-actions"><button class="btn">Save product</button></div><div class="msg" id="productMsg"></div></form>
+    </section>
+    <section class="panel"><div class="panel-head"><div><h2>Product register</h2><p>IDs remain linked to workflow and stock.</p></div><button class="btn secondary" onclick="loadProducts()">Refresh</button></div><div class="tablewrap"><table><thead><tr><th>ID</th><th>Product</th><th>Category</th><th>Stock</th></tr></thead><tbody id="productsTable"></tbody></table></div></section>
+  </div>
+</section>
+<section id="workflow" class="section">
+  <section class="panel"><div class="panel-head"><div><h2>Record workflow update</h2><p>Use one entry for each product stage and quantity.</p></div></div>
+  <form id="workflowForm"><div class="form-grid">
+    <div><label>Product *</label><select name="product_id" id="workflowProduct" required></select></div>
+    <div><label>Production stage *</label><select name="stage"><option>Preparation</option><option>Material preparation</option><option>Cutting</option><option>Assembly</option><option>Finishing</option><option>Completed</option></select></div>
+    <div><label>Quantity *</label><input name="quantity" type="number" min="1" step="1" required></div>
+    <div><label>Started date</label><input name="started_on" type="date"></div>
+    <div class="wide"><label>Notes / worker / details</label><textarea name="notes" placeholder="Optional production notes"></textarea></div>
+  </div><div class="form-actions"><button class="btn">Save workflow update</button></div><div class="msg" id="workflowMsg"></div></form></section>
+  <section class="panel"><div class="panel-head"><div><h2>Recent workflow entries</h2><p>Latest 100 updates</p></div><button class="btn secondary" onclick="loadWorkflow()">Refresh</button></div><div class="tablewrap"><table><thead><tr><th>Date</th><th>Product</th><th>Stage</th><th>Qty</th><th>Employee</th><th>Notes</th></tr></thead><tbody id="workflowTable"></tbody></table></div></section>
+</section>
+<section id="stock" class="section">
+ <div class="panels">
+  <section class="panel"><div class="panel-head"><div><h2>Record stock movement</h2><p>Sales reduce stock; production adds stock.</p></div></div><form id="stockForm"><div class="form-grid">
+   <div class="wide"><label>Product *</label><select name="product_id" id="stockProduct" required></select></div>
+   <div><label>Movement *</label><select name="movement_type"><option value="sold">Sold</option><option value="produced">Produced / received into stock</option><option value="adjustment">Stock adjustment (+ quantity)</option></select></div>
+   <div><label>Quantity *</label><input name="quantity" type="number" min="1" step="1" required></div>
+   <div class="wide"><label>Notes / sale reference</label><textarea name="notes" placeholder="Optional receipt or customer reference"></textarea></div>
+  </div><div class="form-actions"><button class="btn">Save stock movement</button></div><div class="msg" id="stockMsg"></div></form></section>
+  <section class="panel"><div class="panel-head"><div><h2>Current finished stock</h2><p>Calculated from recorded movements.</p></div><button class="btn secondary" onclick="loadProducts()">Refresh</button></div><div class="tablewrap"><table><thead><tr><th>Product ID</th><th>Product</th><th>Produced</th><th>Sold</th><th>Balance</th><th>Status</th></tr></thead><tbody id="stockTable"></tbody></table></div></section>
+ </div>
+ <section class="panel"><div class="panel-head"><div><h2>Recent stock movements</h2><p>Latest 100 transactions</p></div></div><div class="tablewrap"><table><thead><tr><th>Date</th><th>Product</th><th>Movement</th><th>Qty</th><th>Employee</th><th>Notes</th></tr></thead><tbody id="stockMovesTable"></tbody></table></div></section>
+</section>
+<section id="materials" class="section">
+ <div class="panels">
+  <section class="panel"><div class="panel-head"><div><h2>Record material movement</h2><p>Record materials in, used/cut, or waste.</p></div></div><form id="materialForm"><div class="form-grid">
+   <div><label>Material name *</label><input name="material_name" required placeholder="Plywood sheets"></div>
+   <div><label>Movement *</label><select name="movement_type"><option value="received">Received</option><option value="used">Used / cut</option><option value="waste">Waste / damaged</option></select></div>
+   <div><label>Quantity *</label><input name="quantity" type="number" min="0.001" step="0.001" required></div>
+   <div><label>Unit *</label><select name="unit"><option>piece</option><option>sheet</option><option>meter</option><option>cubic meter</option><option>kg</option><option>liter</option></select></div>
+   <div><label>Supplier (for receipts)</label><input name="supplier" placeholder="Supplier name"></div>
+   <div><label>Related product (optional)</label><select name="product_id" id="materialProduct"><option value="">Not linked</option></select></div>
+   <div class="wide"><label>Notes</label><textarea name="notes" placeholder="Invoice, cutting batch, or waste reason"></textarea></div>
+  </div><div class="form-actions"><button class="btn">Save material movement</button></div><div class="msg" id="materialMsg"></div></form></section>
+  <section class="panel"><div class="panel-head"><div><h2>Material balances</h2><p>Calculated from receipts, use and waste.</p></div><button class="btn secondary" onclick="loadMaterials()">Refresh</button></div><div class="tablewrap"><table><thead><tr><th>Material</th><th>Received</th><th>Used</th><th>Balance</th><th>Last movement</th></tr></thead><tbody id="materialsTable"></tbody></table></div></section>
+ </div>
+</section>
+<section id="reports" class="section">
+ <section class="panel"><div class="panel-head"><div><h2>Daily factory report</h2><p>View entries for a selected date.</p></div><div class="actions"><input type="date" id="reportDate"><button class="btn" id="loadReport">Generate report</button></div></div><div id="dailyReport" class="notice">Choose a date and generate the report.</div></section>
+ <div class="panels"><section class="panel"><h2>Export records</h2><p>Download CSV files for Excel or other spreadsheet software.</p><div class="form-actions"><button class="btn secondary" onclick="downloadCsv('products')">Products & stock</button><button class="btn secondary" onclick="downloadCsv('stock')">Stock movements</button><button class="btn secondary" onclick="downloadCsv('materials')">Material balances</button></div></section>
+ <section class="panel"><h2>How the report is calculated</h2><p>Reports summarize saved transactions. Keep the records accurate and avoid entering the same movement twice.</p><div class="notice" style="margin-top:12px">Completed workflow entries automatically add the same quantity to finished stock. Do not separately add that same completion as “Produced” again, or stock will be counted twice. Sales and material usage must be recorded as their own movements.</div></section></div>
+</section>
+<section id="employees" class="section">
+ <div class="panels"><section class="panel"><div class="panel-head"><div><h2>Add employee account</h2><p>Only the main admin can create employee accounts.</p></div></div><form id="userForm"><div class="form-grid"><div><label>Employee name *</label><input name="name" required></div><div><label>Username *</label><input name="username" required pattern="[a-zA-Z0-9_.-]{3,32}"></div><div><label>Temporary password *</label><input name="password" type="password" minlength="10" required></div><div><label>Role *</label><select name="role"><option value="manager">Factory manager</option><option value="production">Production</option><option value="storekeeper">Storekeeper</option><option value="sales">Sales</option></select></div></div><div class="form-actions"><button class="btn">Create account</button></div><div class="msg" id="userMsg"></div></form></section><section class="panel"><div class="panel-head"><div><h2>Employee accounts</h2><p>Account status and access role</p></div><button class="btn secondary" onclick="loadUsers()">Refresh</button></div><div class="tablewrap"><table><thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Status</th><th>Action</th></tr></thead><tbody id="usersTable"></tbody></table></div></section></div>
+</section>
+<div class="footer">AMBAR FURNITURE · Factory records are stored in your PostgreSQL database.</div>
+</main></div>
+<div id="toast" class="toast" style="position:fixed;right:16px;bottom:16px;background:#103d3d;color:#fff;padding:12px 15px;border-radius:11px;font-size:12px;box-shadow:var(--shadow);display:none;max-width:calc(100% - 32px)"></div>
 <script>
-const stages=["Material preparation","Cutting","Assembly","Finishing","Completed","Sold"];
-let token="";
-const $=id=>document.getElementById(id);
-async function request(path,opts={}){const r=await fetch(path,{...opts,headers:{"Content-Type":"application/json",...(token?{Authorization:"Bearer "+token}:{}),...(opts.headers||{})}});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.error||"Request failed");return d}
-function showApp(){ $("loginPanel").classList.add("hidden");$("app").classList.remove("hidden");loadItems()}
-function signOut(){token="";$("app").classList.add("hidden");$("loginPanel").classList.remove("hidden");$("password").value=""}
-$("loginBtn").addEventListener("click",async()=>{ $("loginError").textContent="";try{const d=await request("/api/login",{method:"POST",body:JSON.stringify({password:$("password").value})});token=d.token;showApp()}catch(e){$("loginError").textContent=e.message}});
-$("password").addEventListener("keydown",e=>{if(e.key==="Enter")$("loginBtn").click()});
-$("logoutBtn").addEventListener("click",signOut);$("refreshBtn").addEventListener("click",loadItems);
-$("addForm").addEventListener("submit",async e=>{e.preventDefault();$("formError").textContent="";try{await request("/api/items",{method:"POST",body:JSON.stringify({name:$("name").value,stage:$("stage").value,quantity:$("quantity").value,notes:$("notes").value})});$("addForm").reset();$("quantity").value="1";await loadItems()}catch(err){$("formError").textContent=err.message}});
-async function changeItem(id,field,value){try{await request("/api/items/"+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify({[field]:value})});await loadItems()}catch(e){$("listError").textContent=e.message}}
-async function deleteItem(id){if(!confirm("Delete this job?"))return;try{await request("/api/items/"+encodeURIComponent(id),{method:"DELETE"});await loadItems()}catch(e){$("listError").textContent=e.message}}
-async function loadItems(){ $("listError").textContent="";try{const d=await request("/api/items");const items=d.items||[];$("totalCount").textContent=items.length;$("activeCount").textContent=items.filter(x=>!["Completed","Sold"].includes(x.stage)).length;$("doneCount").textContent=items.filter(x=>["Completed","Sold"].includes(x.stage)).length;if(!items.length){$("list").innerHTML='<div class="empty">No jobs yet. Add your first production job above.</div>';return}
-$("list").innerHTML=items.map(x=>`<article class="job"><div class="jobtop"><div style="min-width:0"><div class="jobname">${esc(x.name)}</div><div class="muted">Quantity: ${Number(x.quantity)||0}${x.notes?" · "+esc(x.notes):""}</div></div><button class="warn" type="button" data-delete="${esc(x.id)}">Delete</button></div><div class="row mobile-stack" style="margin-top:10px"><div><label>Stage</label><select data-stage="${esc(x.id)}">${stages.map(s=>`<option ${x.stage===s?"selected":""}>${s}</option>`).join("")}</select></div><div><label>Quantity</label><input data-qty="${esc(x.id)}" type="number" min="0" step="1" value="${Number(x.quantity)||0}"></div><div style="align-self:end"><button class="alt" type="button" data-save="${esc(x.id)}">Save</button></div></div></article>`).join("");
-$("list").querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",()=>deleteItem(b.dataset.delete)));
-$("list").querySelectorAll("[data-save]").forEach(b=>b.addEventListener("click",()=>{const id=b.dataset.save;const stage=$("list").querySelector(`[data-stage="${CSS.escape(id)}"]`).value;const quantity=$("list").querySelector(`[data-qty="${CSS.escape(id)}"]`).value;changeItem(id,"stage",stage).then(()=>changeItem(id,"quantity",quantity))}));
-}catch(e){$("list").innerHTML='<div class="empty">Could not load production list.</div>';$("listError").textContent=e.message}}
-function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-</script></body></html>
+const $=s=>document.querySelector(s); let token=localStorage.getItem("ambar_token"), me=null, products=[];
+const titles={dashboard:"Daily Report Dashboard",products:"Product Register",workflow:"Production Workflow",stock:"Finished Stock & Sales",materials:"Material Report",reports:"Daily Factory Reports",employees:"Employee Management"};
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function showToast(msg){const t=$("#toast");t.textContent=msg;t.style.display="block";clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.style.display="none",3000);}
+async function api(url,options={}){const r=await fetch(url,{...options,headers:{"Content-Type":"application/json",...(token?{Authorization:"Bearer "+token}:{}),...(options.headers||{})}});const data=await r.json().catch(()=>({}));if(r.status===401){logout();throw Error(data.error||"Please sign in again.");}if(!r.ok)throw Error(data.error||"Request failed.");return data;}
+function formData(form){return Object.fromEntries(new FormData(form).entries());}
+function setMsg(id,msg,ok=false){const el=$("#"+id);el.textContent=msg;el.className="msg "+(ok?"ok":"err");}
+function logout(){token=null;me=null;localStorage.removeItem("ambar_token");$("#app").classList.add("hidden");$("#login").classList.remove("hidden");}
+function enterApp(user){me=user;$("#login").classList.add("hidden");$("#app").classList.remove("hidden");$("#welcome").textContent=`Signed in as ${user.name} · ${user.role}`;$("#today").textContent=new Intl.DateTimeFormat("en",{weekday:"short",day:"numeric",month:"short",year:"numeric"}).format(new Date());if(user.role!=="admin")$("#employeesNav").classList.add("hidden");else $("#employeesNav").classList.remove("hidden");refreshAll();}
+$("#loginForm").addEventListener("submit",async e=>{e.preventDefault();$("#loginError").textContent="";try{const d=await api("/api/login",{method:"POST",body:JSON.stringify(formData(e.target))});token=d.token;localStorage.setItem("ambar_token",token);enterApp(d.user);}catch(err){$("#loginError").textContent=err.message;}});
+$("#logout").onclick=logout;
+document.querySelectorAll("[data-section]").forEach(b=>b.onclick=()=>go(b.dataset.section));
+function go(id){document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));$("#"+id).classList.add("active");document.querySelectorAll("[data-section]").forEach(b=>b.classList.toggle("active",b.dataset.section===id));$("#pageTitle").textContent=titles[id]||"Factory";if(id==="dashboard")loadDashboard();if(id==="products")loadProducts();if(id==="workflow")loadWorkflow();if(id==="stock"){loadProducts();loadStockMoves();}if(id==="materials")loadMaterials();if(id==="employees")loadUsers();}
+function productOptions(){const options=products.map(p=>`<option value="${p.id}">${esc(p.product_code)} · ${esc(p.name)}</option>`).join("");["workflowProduct","stockProduct"].forEach(id=>$("#"+id).innerHTML=options||'<option value="">Register a product first</option>');$("#materialProduct").innerHTML='<option value="">Not linked</option>'+options;}
+async function refreshAll(){await Promise.allSettled([loadDashboard(),loadProducts(),loadMaterials()]);}
+async function loadDashboard(){try{const d=await api("/api/dashboard");$("#mWorkflow").textContent=d.inProduction;$("#mFinished").textContent=d.finishedToday;$("#mSold").textContent=d.soldToday;$("#mLow").textContent=d.lowMaterials;$("#recent").innerHTML=d.recent.length?d.recent.map(x=>`<div style="padding:10px 0;border-bottom:1px solid #edf1f0"><b style="font-size:11px">${esc(x.action)}</b><div class="muted" style="font-size:11px;margin-top:4px">${esc(x.details)} · ${esc(x.employee||"System")} · ${new Date(x.created_at).toLocaleString()}</div></div>`).join(""):'No activity recorded yet.';}catch(e){showToast(e.message);}}
+async function loadProducts(){try{products=await api("/api/products");productOptions();$("#productsTable").innerHTML=products.map(p=>`<tr><td><b>${esc(p.product_code)}</b></td><td>${esc(p.name)}</td><td>${esc(p.category||"—")}</td><td>${p.stock}</td></tr>`).join("")||'<tr><td colspan="4">No products registered yet.</td></tr>';$("#stockTable").innerHTML=products.map(p=>`<tr><td>${esc(p.product_code)}</td><td>${esc(p.name)}</td><td>${p.produced}</td><td>${p.sold}</td><td><b>${p.stock}</b></td><td><span class="badge ${p.stock<=0?"low":""}">${p.stock<=0?"Sold out":"In stock"}</span></td></tr>`).join("")||'<tr><td colspan="6">No products yet.</td></tr>';}catch(e){showToast(e.message);}}
+$("#productForm").onsubmit=async e=>{e.preventDefault();try{const p=await api("/api/products",{method:"POST",body:JSON.stringify(formData(e.target))});setMsg("productMsg",`Saved ${p.product_code} · ${p.name}`,true);e.target.reset();await loadProducts();await loadDashboard();}catch(err){setMsg("productMsg",err.message);}};
+$("#workflowForm").onsubmit=async e=>{e.preventDefault();try{const d=formData(e.target);if(!d.started_on)d.started_on=new Date().toISOString().slice(0,10);await api("/api/workflow",{method:"POST",body:JSON.stringify(d)});setMsg("workflowMsg","Workflow entry saved.",true);e.target.reset();await Promise.all([loadWorkflow(),loadProducts(),loadDashboard()]);}catch(err){setMsg("workflowMsg",err.message);}};
+async function loadWorkflow(){try{const rows=await api("/api/workflow");$("#workflowTable").innerHTML=rows.map(x=>`<tr><td>${esc(x.started_on?.slice(0,10))}</td><td>${esc(x.product_code)} · ${esc(x.product_name)}</td><td>${esc(x.stage)}</td><td>${x.quantity}</td><td>${esc(x.employee||"—")}</td><td>${esc(x.notes||"—")}</td></tr>`).join("")||'<tr><td colspan="6">No workflow entries yet.</td></tr>';}catch(e){showToast(e.message);}}
+$("#stockForm").onsubmit=async e=>{e.preventDefault();try{await api("/api/stock-movements",{method:"POST",body:JSON.stringify(formData(e.target))});setMsg("stockMsg","Stock movement saved.",true);e.target.reset();await Promise.all([loadProducts(),loadStockMoves(),loadDashboard()]);}catch(err){setMsg("stockMsg",err.message);}};
+async function loadStockMoves(){try{const rows=await api("/api/stock-movements");$("#stockMovesTable").innerHTML=rows.map(x=>`<tr><td>${esc(x.movement_date?.slice(0,10))}</td><td>${esc(x.product_code)} · ${esc(x.product_name)}</td><td>${esc(x.movement_type)}</td><td>${x.quantity}</td><td>${esc(x.employee||"—")}</td><td>${esc(x.notes||"—")}</td></tr>`).join("")||'<tr><td colspan="6">No stock movements yet.</td></tr>';}catch(e){showToast(e.message);}}
+$("#materialForm").onsubmit=async e=>{e.preventDefault();try{const d=formData(e.target);if(!d.product_id)delete d.product_id;await api("/api/materials",{method:"POST",body:JSON.stringify(d)});setMsg("materialMsg","Material movement saved.",true);e.target.reset();await Promise.all([loadMaterials(),loadDashboard()]);}catch(err){setMsg("materialMsg",err.message);}};
+async function loadMaterials(){try{const rows=await api("/api/materials");$("#materialsTable").innerHTML=rows.map(x=>`<tr><td>${esc(x.material_name)}</td><td>${x.received} ${esc(x.unit)}</td><td>${x.used} ${esc(x.unit)}</td><td><b>${x.balance} ${esc(x.unit)}</b></td><td>${esc(x.last_movement?.slice(0,10)||"—")}</td></tr>`).join("")||'<tr><td colspan="5">No material movements yet.</td></tr>';}catch(e){showToast(e.message);}}
+$("#loadReport").onclick=async()=>{try{const date=$("#reportDate").value||new Date().toISOString().slice(0,10);const d=await api("/api/reports/daily?date="+encodeURIComponent(date));$("#dailyReport").innerHTML=`<b>DAILY REPORT · ${esc(d.date)}</b><br><br><b>Workflow</b><br>${d.workflow.map(x=>`${esc(x.stage)}: ${x.quantity} units (${x.entries} entries)`).join("<br>")||"No workflow entries"}<br><br><b>Stock movements</b><br>${d.stock.map(x=>`${esc(x.movement_type)}: ${x.quantity} units`).join("<br>")||"No stock movements"}<br><br><b>Material movements</b><br>${d.materials.map(x=>`${esc(x.material_name)}: ${x.quantity} ${esc(x.unit)} ${esc(x.movement_type)}`).join("<br>")||"No material movements"}<br><br><b>Activity count:</b> ${d.activity.length}`;}catch(e){showToast(e.message);}};
+async function loadUsers(){if(me?.role!=="admin"){showToast("Only the main admin can manage employee accounts.");return;}try{const rows=await api("/api/users");$("#usersTable").innerHTML=rows.map(u=>`<tr><td>${esc(u.name)}</td><td>${esc(u.username)}</td><td>${esc(u.role)}</td><td><span class="badge ${u.active?"":"low"}">${u.active?"Active":"Inactive"}</span></td><td>${u.role==="admin"?"—":`<button class="btn ${u.active?"danger":"secondary"}" onclick="toggleUser(${u.id},${!u.active})">${u.active?"Deactivate":"Activate"}</button>`}</td></tr>`).join("");}catch(e){showToast(e.message);}}
+window.toggleUser=async(id,active)=>{try{await api("/api/users/"+id,{method:"PATCH",body:JSON.stringify({active})});await loadUsers();showToast("Employee account updated.");}catch(e){showToast(e.message);}};
+$("#userForm").onsubmit=async e=>{e.preventDefault();try{await api("/api/users",{method:"POST",body:JSON.stringify(formData(e.target))});setMsg("userMsg","Employee account created.",true);e.target.reset();await loadUsers();}catch(err){setMsg("userMsg",err.message);}};
+function downloadCsv(kind){if(!token){showToast("Sign in first.");return;}fetch("/api/reports/export.csv?kind="+encodeURIComponent(kind),{headers:{Authorization:"Bearer "+token}}).then(r=>{if(!r.ok)throw Error("Export failed");return r.blob()}).then(blob=>{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`ambar-${kind}.csv`;a.click();URL.revokeObjectURL(a.href)}).catch(e=>showToast(e.message));}
+$("#exportBtn").onclick=()=>downloadCsv("stock");
+$("#reportDate").value=new Date().toISOString().slice(0,10);
+if(token){api("/api/me").then(d=>enterApp(d.user)).catch(()=>logout());}
+</script>
+</body>
+</html>
