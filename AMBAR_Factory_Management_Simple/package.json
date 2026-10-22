@@ -1,11 +1,22 @@
 {
-  "name": "ambar-factory-management",
+  "name": "ambar-furniture-factory-management",
   "version": "1.0.0",
-  "description": "Simple AMBAR Factory Management Telegram Mini App",
+  "private": true,
+  "description": "AMBAR Furniture factory workflow, stock, material and daily reporting app with Telegram bot.",
   "main": "server.js",
-  "scripts": { "start": "node server.js" },
-  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
-    "@supabase/supabase-js": "^2.57.0"
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "node-cron": "^3.0.3",
+    "pg": "^8.13.1"
   }
 }
