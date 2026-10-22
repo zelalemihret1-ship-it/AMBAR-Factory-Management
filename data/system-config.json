@@ -1,0 +1,28 @@
+{
+  "appName": "AMBAR Factory Management",
+  "categories": [
+    "Shoe Shelf",
+    "Others",
+    "Gadgets"
+  ],
+  "materialCategories": [
+    "Normal MDF",
+    "Oak",
+    "Laminate",
+    "Plywood / Suf",
+    "Chipped",
+    "Australia",
+    "Morale",
+    "UV Black",
+    "Other"
+  ],
+  "workflowStages": [
+    "PREPARING",
+    "IN PRODUCTION",
+    "FINISHING",
+    "IN STOCK",
+    "DELIVERED",
+    "ON HOLD"
+  ],
+  "dateCalendar": "Ethiopian"
+}

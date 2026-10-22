@@ -1,0 +1,9 @@
+[
+  {
+    "username": "testowner",
+    "role": "owner",
+    "salt": "09dedd5e1e3bf7cfd435940d59334ee8",
+    "hash": "6a34f5a6db2a3b99ce910be7dbfd1a5ae4e7e6a4be100635d67ccc42b7fc7c69beb0559d2e308426751a5a7e0ce9e5bad2665b26eb263991c858323dd909f851",
+    "createdAt": "2026-10-22T11:21:48.456Z"
+  }
+]
