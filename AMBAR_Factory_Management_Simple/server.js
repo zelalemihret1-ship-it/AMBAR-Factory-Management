@@ -1,70 +1,27 @@
 'use strict';
-const express = require('express');
-const { Pool } = require('pg');
-const path = require('path');
-const app = express();
-const PORT = Number(process.env.PORT || 3000);
-if (!process.env.DATABASE_URL) {
-  console.error('DATABASE_URL is required. Attach a PostgreSQL database in Render and set DATABASE_URL.');
-  process.exit(1);
-}
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: process.env.PGSSLMODE === 'disable' ? false : { rejectUnauthorized: false }, max: 10 });
-app.disable('x-powered-by');
-app.use(express.json({ limit: '5mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
-const EMPTY = { orders: [], products: [], materials: [], sales: [], activityLog: [], nextId: 1 };
-async function initDb() {
-  await pool.query(`CREATE TABLE IF NOT EXISTS ambar_workshop_state (
-    id smallint PRIMARY KEY CHECK (id = 1),
-    state jsonb NOT NULL,
-    version bigint NOT NULL DEFAULT 1,
-    updated_at timestamptz NOT NULL DEFAULT now(),
-    updated_by text
-  )`);
-  await pool.query(`INSERT INTO ambar_workshop_state(id,state) VALUES (1,$1::jsonb) ON CONFLICT(id) DO NOTHING`, [JSON.stringify(EMPTY)]);
-}
-app.get('/api/health', async (_req, res) => {
-  try { await pool.query('SELECT 1'); res.json({ ok: true, service: 'AMBAR Workshop ERP', database: 'postgresql', status: 'connected' }); }
-  catch (e) { console.error('health check failed', e.message); res.status(503).json({ ok: false, database: 'unavailable' }); }
-});
-app.get('/api/state', async (_req, res) => {
-  try {
-    const { rows } = await pool.query('SELECT state, version, updated_at FROM ambar_workshop_state WHERE id=1');
-    res.set('Cache-Control', 'no-store');
-    res.json({ ...rows[0].state, _meta: { version: Number(rows[0].version), updatedAt: rows[0].updated_at } });
-  } catch (e) { console.error('state read failed', e.message); res.status(500).json({ error: 'Could not load workshop data from PostgreSQL' }); }
-});
-app.put('/api/state', async (req, res) => {
-  const body = req.body;
-  if (!body || typeof body !== 'object' || Array.isArray(body)) return res.status(400).json({ error: 'Expected a state object' });
-  for (const key of ['orders', 'products', 'materials', 'sales', 'activityLog']) {
-    if (body[key] !== undefined && !Array.isArray(body[key])) return res.status(400).json({ error: `${key} must be an array` });
-  }
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    // Serialize writes so two devices cannot write the shared snapshot simultaneously.
-    await client.query("SELECT pg_advisory_xact_lock(hashtext('ambar_workshop_state'))");
-    const current = await client.query('SELECT state, version FROM ambar_workshop_state WHERE id=1 FOR UPDATE');
-    const old = current.rows[0].state || EMPTY;
-    const next = {};
-    for (const key of Object.keys(EMPTY)) next[key] = body[key] === undefined ? old[key] : body[key];
-    // Normalize basic stock fields to prevent undefined/NaN stock from entering shared records.
-    next.materials = (next.materials || []).filter(x => x && typeof x === 'object').map((m, i) => ({
-      ...m, id: Number(m.id) || i + 1, name: String(m.name || 'Unnamed material'), unit: String(m.unit || 'Unit'),
-      stock: Number.isFinite(Number(m.stock)) ? Number(m.stock) : 0,
-      threshold: Number.isFinite(Number(m.threshold)) ? Number(m.threshold) : 0,
-      cost: Number.isFinite(Number(m.cost)) ? Number(m.cost) : 0
-    }));
-    const version = Number(current.rows[0].version) + 1;
-    await client.query('UPDATE ambar_workshop_state SET state=$1::jsonb, version=$2, updated_at=now() WHERE id=1', [JSON.stringify(next), version]);
-    await client.query('COMMIT');
-    res.json({ ok: true, version, savedAt: new Date().toISOString(), database: 'postgresql' });
-  } catch (e) {
-    await client.query('ROLLBACK'); console.error('state write failed', e.message);
-    res.status(500).json({ error: 'Could not save workshop data transactionally' });
-  } finally { client.release(); }
-});
-app.use((err, _req, res, _next) => { console.error(err.message); res.status(400).json({ error: 'Invalid request' }); });
-initDb().then(() => app.listen(PORT, () => console.log(`AMBAR Workshop ERP listening on ${PORT}; PostgreSQL connected`))).catch(e => { console.error('Database initialization failed:', e.message); process.exit(1); });
-process.on('SIGTERM', async () => { await pool.end(); process.exit(0); });
+const express=require('express'),{Pool}=require('pg'),path=require('path'),crypto=require('crypto');
+const app=express(),PORT=Number(process.env.PORT||3000);
+if(!process.env.DATABASE_URL){console.error('DATABASE_URL is required');process.exit(1)}
+if(!process.env.ADMIN_PASSWORD||!process.env.ADMIN_USERNAME){console.error('Set ADMIN_USERNAME and a strong ADMIN_PASSWORD in Render environment variables before deploying.');process.exit(1)}
+const pool=new Pool({connectionString:process.env.DATABASE_URL,ssl:process.env.PGSSLMODE==='disable'?false:{rejectUnauthorized:false},max:10});
+app.disable('x-powered-by');app.use(express.json({limit:'5mb'}));app.use(express.static(path.join(__dirname,'public')));
+const EMPTY={orders:[],products:[],materials:[],materialTransactions:[],sales:[],activityLog:[],nextId:1};
+const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
+function pwHash(p,salt=crypto.randomBytes(16).toString('hex')){return new Promise((resolve,reject)=>crypto.scrypt(String(p),salt,64,(e,key)=>e?reject(e):resolve({salt,hash:key.toString('hex')})))}
+async function verify(p,salt,expected){const v=await pwHash(p,salt);return crypto.timingSafeEqual(Buffer.from(v.hash,'hex'),Buffer.from(expected,'hex'))}
+async function initDb(){await pool.query(`CREATE TABLE IF NOT EXISTS ambar_workshop_state(id smallint PRIMARY KEY CHECK(id=1),state jsonb NOT NULL,version bigint NOT NULL DEFAULT 1,updated_at timestamptz NOT NULL DEFAULT now())`);await pool.query('INSERT INTO ambar_workshop_state(id,state) VALUES(1,$1::jsonb) ON CONFLICT(id) DO NOTHING',[JSON.stringify(EMPTY)]);await pool.query(`CREATE TABLE IF NOT EXISTS ambar_users(id bigserial primary key,username text unique not null,display_name text not null,password_salt text not null,password_hash text not null,role text not null check(role in ('admin','staff')),area text not null default 'all',active boolean not null default true,created_at timestamptz not null default now())`);await pool.query(`CREATE TABLE IF NOT EXISTS ambar_sessions(token_hash text primary key,user_id bigint not null references ambar_users(id) on delete cascade,expires_at timestamptz not null)`);const u=process.env.ADMIN_USERNAME.trim().toLowerCase();if(!/^[a-z0-9._-]{3,40}$/.test(u))throw new Error('ADMIN_USERNAME must be 3–40 characters using lowercase letters, numbers, dot, underscore, or hyphen');if(String(process.env.ADMIN_PASSWORD).length<12)throw new Error('ADMIN_PASSWORD must be at least 12 characters');const p=await pwHash(process.env.ADMIN_PASSWORD);const ownerName=String(process.env.ADMIN_NAME||'AMBAR Main Administrator').trim();const owner=await pool.query(`INSERT INTO ambar_users(username,display_name,password_salt,password_hash,role,area,active) VALUES($1,$2,$3,$4,'admin','all',true) ON CONFLICT(username) DO UPDATE SET display_name=EXCLUDED.display_name,password_salt=EXCLUDED.password_salt,password_hash=EXCLUDED.password_hash,role='admin',area='all',active=true RETURNING id`,[u,ownerName,p.salt,p.hash]);await pool.query('DELETE FROM ambar_sessions WHERE user_id=$1',[owner.rows[0].id]);console.log(`Main administrator account ensured for username: ${u}; password synchronized from Render environment variables; prior sessions revoked`); }
+function tokenFrom(req){const m=(req.headers.cookie||'').match(/(?:^|;\s*)ambar_session=([^;]+)/);return m?decodeURIComponent(m[1]):''}
+async function auth(req,res,next){try{const t=tokenFrom(req);if(!t)return res.status(401).json({error:'Please sign in'});const q=await pool.query(`select u.id,u.username,u.display_name,u.role,u.area,u.active from ambar_sessions s join ambar_users u on u.id=s.user_id where s.token_hash=$1 and s.expires_at>now()`,[hash(t)]);if(!q.rowCount||!q.rows[0].active)return res.status(401).json({error:'Session expired; sign in again'});req.user=q.rows[0];next()}catch(e){res.status(500).json({error:'Authentication service unavailable'})}}
+const admin=(req,res,next)=>req.user?.role==='admin'?next():res.status(403).json({error:'Administrator access required'});
+app.get('/api/health',async(_req,res)=>{try{await pool.query('select 1');res.json({ok:true,database:'postgresql',auth:'enabled'})}catch(e){res.status(503).json({ok:false})}});
+app.post('/api/login',async(req,res)=>{try{const username=String(req.body?.username||'').trim().toLowerCase(),password=String(req.body?.password||'');const q=await pool.query('select * from ambar_users where username=$1 and active=true',[username]);if(!q.rowCount||!(await verify(password,q.rows[0].password_salt,q.rows[0].password_hash)))return res.status(401).json({error:'Incorrect username or password'});const t=crypto.randomBytes(32).toString('hex');await pool.query('insert into ambar_sessions(token_hash,user_id,expires_at) values($1,$2,now()+interval \'12 hours\')',[hash(t),q.rows[0].id]);res.setHeader('Set-Cookie',`ambar_session=${t}; HttpOnly; SameSite=Lax; Path=/; Max-Age=43200${process.env.NODE_ENV==='production'?'; Secure':''}`);res.json({user:{id:q.rows[0].id,username:q.rows[0].username,name:q.rows[0].display_name,role:q.rows[0].role,area:q.rows[0].area}})}catch(e){console.error(e);res.status(500).json({error:'Could not sign in'})}});
+app.get('/api/me',auth,(req,res)=>res.json({user:{id:req.user.id,username:req.user.username,name:req.user.display_name,role:req.user.role,area:req.user.area}}));
+app.post('/api/logout',async(req,res)=>{const t=tokenFrom(req);if(t)await pool.query('delete from ambar_sessions where token_hash=$1',[hash(t)]);res.setHeader('Set-Cookie','ambar_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0');res.json({ok:true})});
+app.get('/api/users',auth,admin,async(_req,res)=>{const q=await pool.query('select id,username,display_name as name,role,area,active,created_at from ambar_users order by id');res.json(q.rows)});
+app.post('/api/users',auth,admin,async(req,res)=>{try{const name=String(req.body?.name||'').trim(),username=String(req.body?.username||'').trim().toLowerCase(),password=String(req.body?.password||''),role=req.body?.role==='admin'?'admin':'staff',area=['workshop','inventory','materials','sales','reports','all'].includes(req.body?.area)?req.body.area:'workshop';if(!name||!/^[a-z0-9._-]{3,40}$/.test(username)||password.length<10)return res.status(400).json({error:'Name, valid username, and password of at least 10 characters are required'});const p=await pwHash(password);const q=await pool.query('insert into ambar_users(username,display_name,password_salt,password_hash,role,area) values($1,$2,$3,$4,$5,$6) returning id,username,display_name as name,role,area,active',[username,name,p.salt,p.hash,role,area]);res.status(201).json(q.rows[0])}catch(e){if(e.code==='23505')return res.status(409).json({error:'Username already exists'});console.error(e);res.status(500).json({error:'Could not create staff account'})}});
+app.patch('/api/users/:id',auth,admin,async(req,res)=>{const active=!!req.body?.active;const q=await pool.query('update ambar_users set active=$1 where id=$2 and role<>\'admin\' returning id',[active,req.params.id]);if(!q.rowCount)return res.status(404).json({error:'Staff account not found or protected'});if(!active)await pool.query('delete from ambar_sessions where user_id=$1',[req.params.id]);res.json({ok:true})});
+app.get('/api/state',auth,async(_req,res)=>{try{const q=await pool.query('select state,version,updated_at from ambar_workshop_state where id=1');res.set('Cache-Control','no-store');res.json({...q.rows[0].state,_meta:{version:Number(q.rows[0].version),updatedAt:q.rows[0].updated_at}})}catch(e){res.status(500).json({error:'Could not load workshop data'})}});
+app.put('/api/state',auth,async(req,res)=>{const body=req.body;if(!body||typeof body!=='object'||Array.isArray(body))return res.status(400).json({error:'Expected state object'});for(const k of ['orders','products','materials','materialTransactions','sales','activityLog'])if(body[k]!==undefined&&!Array.isArray(body[k]))return res.status(400).json({error:`${k} must be an array`});const client=await pool.connect();try{await client.query('begin');await client.query("select pg_advisory_xact_lock(hashtext('ambar_workshop_state'))");const q=await client.query('select state,version from ambar_workshop_state where id=1 for update'),old=q.rows[0].state||EMPTY;const next={...old};for(const k of Object.keys(EMPTY))if(body[k]!==undefined)next[k]=body[k];if(req.user.role!=='admin'){const permitted={workshop:['orders','activityLog'],inventory:['products','sales','activityLog'],materials:['materials','materialTransactions','activityLog'],sales:['sales','products','activityLog'],reports:[]};const allowed=permitted[req.user.area]||[];for(const k of Object.keys(EMPTY)){if(!allowed.includes(k)&&JSON.stringify(next[k])!==JSON.stringify(old[k])){await client.query('rollback');return res.status(403).json({error:`Your account cannot change ${k}. Ask the administrator to update your assigned area.`})}}}
+next.materials=(next.materials||[]).filter(x=>x&&typeof x==='object').map((m,i)=>({...m,id:Number(m.id)||i+1,name:String(m.name||'Unnamed material'),unit:String(m.unit||'Unit'),stock:Number.isFinite(Number(m.stock))?Number(m.stock):0,threshold:Number.isFinite(Number(m.threshold))?Number(m.threshold):0,cost:Number.isFinite(Number(m.cost))?Number(m.cost):0}));const version=Number(q.rows[0].version)+1;await client.query('update ambar_workshop_state set state=$1::jsonb,version=$2,updated_at=now() where id=1',[JSON.stringify(next),version]);await client.query('commit');res.json({ok:true,version,database:'postgresql'})}catch(e){await client.query('rollback');console.error(e);res.status(500).json({error:'Could not save shared state'})}finally{client.release()}});
+app.use((err,_req,res,_next)=>{console.error(err.message);res.status(400).json({error:'Invalid request'})});
+initDb().then(()=>app.listen(PORT,()=>console.log(`AMBAR ERP running on ${PORT}`))).catch(e=>{console.error('DB initialization failed',e);process.exit(1)});process.on('SIGTERM',async()=>{await pool.end();process.exit(0)});
